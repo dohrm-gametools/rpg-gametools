@@ -11,19 +11,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: "Setup Use Node.js"
-        uses: actions/setup-node@v2
-        with:
-          node-version: 21.x
       - name: Login to Docker Registry
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | \
           docker login docker.pkg.github.com -u docker --password-stdin
       - name: Setup Version name
         run: echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
-      - name: "[BACKEND] - Build"
-        run: npm ci && npm run build --if-present && ls
-      - name: "[CONTAINER]"
+      - name: "[BUILD]"
         uses: docker/build-push-action@v5.2.0
         with:
           pull: true

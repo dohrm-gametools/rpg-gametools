@@ -19,9 +19,21 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | \
           docker login docker.pkg.github.com -u docker --password-stdin
+      - name: Setup Version name
+        run: echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
       - name: "[BACKEND] - Build"
         run: npm ci && npm run build --if-present
-        working-directory: frontend
+      - name: "[CONTAINER]"
+        uses: docker/build-push-action@v5.2.0
+        with:
+          pull: true
+          push: true
+          platforms: linux/amd64
+          file: ./Dockerfile
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          tags:  docker.pkg.github.com/dohrm-gametools/rpg-gametools/rpg-gametools:${{ env.BRANCH }}
+          build-args: |
+              BRANCH=${{ env.BRANCH }}
   deploy:
     runs-on: ubuntu-latest
     needs: [release]
